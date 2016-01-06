@@ -451,9 +451,8 @@ def parse_data(line):
 
 if __name__ == '__main__':
     zipFileName = sys.argv[1];
-    start = datetime.now()
     
-    conn = mysql.connector.connect(user = 'root', password = 'UPEL@usu670', database = "can_data")
+    conn = mysql.connector.connect(user = 'root', password = 'FhVj9ot4', host = '104.154.59.36', port = '3306', database = "amped")
     curs = conn.cursor()
     
     with zipfile.ZipFile(zipFileName,'r') as zipin:
@@ -465,6 +464,3 @@ if __name__ == '__main__':
     curs.close()
     conn.close()
     
-    end = datetime.now()
-    timer = end-start
-    print timer

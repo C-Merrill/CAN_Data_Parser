@@ -1,8 +1,14 @@
 ﻿#!/usr/bin/python
 
 ####################################################################################
-##  CAN Data Parser for 
-##  
+##  CAN Data Parser for use in conjunction with AMPED battery management          ##
+##  experiment. Processes previous text files contained in zip archives and       ##
+##  logs data accordingly in a SQL database. Skips files that have already been   ##
+##  parsed.                                                                       ##
+##                                                                                ##
+##  Author: Chris Merrill                                                         ##
+##                                                                                ##
+####################################################################################  
 
 import zipfile
 import mysql.connector
@@ -10,7 +16,7 @@ import re
 import sys
 from datetime import datetime
 
-#Data processing functions by ID that return a dictionary with the data ID and value
+#Data processing functions by ID that return a dictionary with the data name and value
 ####################################################################################
 def ControlBatteryCmds(data, id):                                                 ##
     return {                                                                      ##
@@ -160,7 +166,7 @@ def CellVoltageGroup(data, id):                                                 
         'CellVoltage_'+str(r+4): ((data)&0xFFFF)*0.0001                           ##
     }                                                                             ##
                                                                                   ##
-def CellSOC_Group(data, id):                                                       ##
+def CellSOC_Group(data, id):                                                      ##
     r = (int(id,16) % int('320',16))*4                                            ##
     return {                                                                      ##
         'BECMCellSOC_'+str(r+1): ((data>>48)&0x3FFF)*0.01,                        ##

@@ -14,6 +14,7 @@ import zipfile
 import mysql.connector
 import re
 import sys
+import os
 from datetime import datetime
 
 #Data processing functions by ID that return a dictionary with the data name and value
@@ -60,9 +61,9 @@ def ControlConverterCmds(data, id):                                             
     return {                                                                      ##
         'ConverterEnable': (data>>63)&0x1,                                        ##
         'ConverterCalibrate': (data>>61)&0x3,                                     ##
-        'CalibrationVoltage': ((data>>40)&0x1FFF)*0.0001+10,                      ##
+        'CalibrationVoltage': ((data>>40)&0x1FFF)*0.001+10,                       ##
         'Objective_Map_Rq': (data>>37)&0x7,                                       ##
-        'Objective_Map_LifeGain': ((data>>24)&0xFF)*0.0001                        ##
+        'Objective_Map_LifeGain': ((data>>24)&0xFF)*0.001                         ##
     }                                                                             ##
                                                                                   ##
 def ManualConverterCmds(data, id):                                                ##
@@ -169,10 +170,10 @@ def CellVoltageGroup(data, id):                                                 
 def CellSOC_Group(data, id):                                                      ##
     r = (int(id,16) % int('320',16))*4                                            ##
     return {                                                                      ##
-        'BECMCellSOC_'+str(r+1): ((data>>48)&0x3FFF)*0.01,                        ##
-        'BECMCellSOC_'+str(r+2): ((data>>32)&0x3FFF)*0.01,                        ##
-        'BECMCellSOC_'+str(r+3): ((data>>16)&0x3FFF)*0.01,                        ##
-        'BECMCellSOC_'+str(r+4): ((data)&0x3FFF)*0.01                             ##
+        'BECMCellSOC_'+str(r+1): ((data>>48)&0x3FF)*0.1,                          ##
+        'BECMCellSOC_'+str(r+2): ((data>>32)&0x3FF)*0.1,                          ##
+        'BECMCellSOC_'+str(r+3): ((data>>16)&0x3FF)*0.1,                          ##
+        'BECMCellSOC_'+str(r+4): ((data)&0x3FF)*0.1                               ##
     }                                                                             ##
                                                                                   ##
 def CellCurrentGroup(data, id):                                                   ##
@@ -263,36 +264,36 @@ def USUCellSOCGroup_11(data, id):                                               
 def USUSOCBoundsGroup(data, id):                                                  ##
     r = ((int(id,16) % int('460'))-1)*8                                           ##
     return {                                                                      ##
-        'USUSOCBounds_1': ((data>>56)&0xFF)*0.1,                                  ##
-        'USUSOCBounds_2': ((data>>48)&0xFF)*0.1,                                  ##
-        'USUSOCBounds_3': ((data>>40)&0xFF)*0.1,                                  ##
-        'USUSOCBounds_4': ((data>>32)&0xFF)*0.1,                                  ##
-        'USUSOCBounds_5': ((data>>24)&0xFF)*0.1,                                  ##
-        'USUSOCBounds_6': ((data>>16)&0xFF)*0.1,                                  ##
-        'USUSOCBounds_7': ((data>>8)&0xFF)*0.1,                                   ##
-        'USUSOCBounds_8': ((data)&0xFF)*0.1                                       ##
+        'USUSOCBounds_'+str(r+1): ((data>>56)&0xFF)*0.1,                          ##
+        'USUSOCBounds_'+str(r+2): ((data>>48)&0xFF)*0.1,                          ##
+        'USUSOCBounds_'+str(r+3): ((data>>40)&0xFF)*0.1,                          ##
+        'USUSOCBounds_'+str(r+4): ((data>>32)&0xFF)*0.1,                          ##
+        'USUSOCBounds_'+str(r+5): ((data>>24)&0xFF)*0.1,                          ##
+        'USUSOCBounds_'+str(r+6): ((data>>16)&0xFF)*0.1,                          ##
+        'USUSOCBounds_'+str(r+7): ((data>>8)&0xFF)*0.1,                           ##
+        'USUSOCBounds_'+str(r+8): ((data)&0xFF)*0.1                               ##
     }                                                                             ##
                                                                                   ##
 def USUBoardTempGroup(data, id):                                                  ##
     r = ((int(id,16) % int('480',16))-1)*8                                        ##
     return {                                                                      ##
-        'USUBoardTemp_1': ((data>>56)&0xFF)-40,                                   ##
-        'USUBoardTemp_2': ((data>>48)&0xFF)-40,                                   ##
-        'USUBoardTemp_3': ((data>>40)&0xFF)-40,                                   ##
-        'USUBoardTemp_4': ((data>>32)&0xFF)-40,                                   ##
-        'USUBoardTemp_5': ((data>>24)&0xFF)-40,                                   ##
-        'USUBoardTemp_6': ((data>>16)&0xFF)-40,                                   ##
-        'USUBoardTemp_7': ((data>>8)&0xFF)-40,                                    ##
-        'USUBoardTemp_8': ((data)&0xFF)-40                                        ##
+        'USUBoardTemp_'+str(r+1): ((data>>56)&0xFF)-40,                           ##
+        'USUBoardTemp_'+str(r+2): ((data>>48)&0xFF)-40,                           ##
+        'USUBoardTemp_'+str(r+3): ((data>>40)&0xFF)-40,                           ##
+        'USUBoardTemp_'+str(r+4): ((data>>32)&0xFF)-40,                           ##
+        'USUBoardTemp_'+str(r+5): ((data>>24)&0xFF)-40,                           ##
+        'USUBoardTemp_'+str(r+6): ((data>>16)&0xFF)-40,                           ##
+        'USUBoardTemp_'+str(r+7): ((data>>8)&0xFF)-40,                            ##
+        'USUBoardTemp_'+str(r+8): ((data)&0xFF)-40                                ##
     }                                                                             ##
                                                                                   ##
 def USUBusVoltageGroup(data, id):                                                 ##
     r = ((int(id,16) % int('4A0',16))-1)*4                                        ##
     return {                                                                      ##
-        'USULVBusVoltage_1': ((data>>48)&0xFFF)*0.01,                             ##
-        'USULVBusVoltage_2': ((data>>32)&0xFFF)*0.01,                             ##
-        'USULVBusVoltage_3': ((data>>16)&0xFFF)*0.01,                             ##
-        'USULVBusVoltage_4': ((data)&0xFFF)*0.01                                  ##
+        'USULVBusVoltage_'+str(r+1): ((data>>48)&0xFFF)*0.01,                     ##
+        'USULVBusVoltage_'+str(r+2): ((data>>32)&0xFFF)*0.01,                     ##
+        'USULVBusVoltage_'+str(r+3): ((data>>16)&0xFFF)*0.01,                     ##
+        'USULVBusVoltage_'+str(r+4): ((data)&0xFFF)*0.01                          ##
     }                                                                             ##
                                                                                   ##
 def USUBusVoltageGroup_11(data, id):                                              ##
@@ -326,11 +327,12 @@ def send2SQL(timestamp, dataGroup, dataHash):
         feed.append((dataGroup, key, timestamp, val))
     for toop in feed:
         curs.execute("INSERT INTO can_data VALUES (%s,%s,%s,%s)", toop)
+    conn.commit()
     return
 
 #main parser script with dictionary branching to data processing function according to ID
 def parse_data(line):
-    pat = r'(\d+)/(\d+)/(\d+) (\d+):(\d+):(\d+)\.(\d+): (\w+) (.*) '
+    pat = r'(\d+)/(\d+)/(\d+) (\d+):(\d+):(\d+)\.(\d+): (\w+) (.*)'
     match = re.match(pat, line)
     myDateTime = datetime(int(match.group(3)),int(match.group(1)),int(match.group(2)),int(match.group(4)),int(match.group(5)),int(match.group(6)),int(match.group(7))*1000)
     
@@ -530,20 +532,26 @@ def parse_data(line):
     return
 
 if __name__ == '__main__':
-    #zipFileName = sys.argv[1];
-    zipFileName = "12-43-24.zip"
-
     starttime = datetime.now()
 
     #conn = mysql.connector.connect(user = 'root', password = 'FhVj9ot4', host = '104.154.59.36', port = '3306', database = "amped")
     conn = mysql.connector.connect(user = 'root', password = 'UPEL@usu670', host = 'localhost', database = 'can_data') 
     curs = conn.cursor()
     
-    with zipfile.ZipFile(zipFileName,'r') as zipin:
-        txtFile = zipin.namelist()[0];
-        with zipin.open(txtFile,'r') as infile:
-            [parse_data(line) for line in infile.readlines()]
-    
+    for root, dirs, files in os.walk('C:\\Users\\Chris\\Dropbox\\Projects\\AMPED\\AMPED_Data\\CAN_Sniffer_Data',topdown = False):
+        for zipFileName in files:
+            if re.search(r'\.zip',zipFileName):
+                print os.path.join(root,zipFileName)
+                m = re.match(r'.*\\(\d{4})\\(\d+)\\(\d+)\\(\d{2})-(\d{2})-(\d{2})(\(\d*\))?\.zip',os.path.join(root,zipFileName))
+                loTime = m.group(1)+'/'+m.group(2)+'/'+m.group(3)+' '+m.group(4)+':'+m.group(5)+':'+str(int(m.group(6))+1)
+                hiTime = m.group(1)+'/'+m.group(2)+'/'+m.group(3)+' '+m.group(4)+':'+m.group(5)+':'+str(int(m.group(6))+2)
+                curs.execute("SELECT count(1) FROM can_data WHERE timestamp BETWEEN %s AND %s",(loTime,hiTime))
+                if not curs.fetchone()[0]:
+                    with zipfile.ZipFile(os.path.join(root,zipFileName),'r') as zipin:
+                        with zipin.open(zipin.namelist()[0]) as fin:
+                            [parse_data(line) for line in fin]
+
+ 
     conn.commit()
     curs.close()
     conn.close()

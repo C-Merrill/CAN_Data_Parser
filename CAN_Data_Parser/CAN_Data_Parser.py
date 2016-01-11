@@ -327,7 +327,6 @@ def send2SQL(timestamp, dataGroup, dataHash):
         feed.append((dataGroup, key, timestamp, val))
     for toop in feed:
         curs.execute("INSERT INTO can_data VALUES (%s,%s,%s,%s)", toop)
-    conn.commit()
     return
 
 #main parser script with dictionary branching to data processing function according to ID
@@ -532,14 +531,15 @@ def parse_data(line):
     return
 
 if __name__ == '__main__':
-    starttime = datetime.now()
+    #starttime = datetime.now()
 
-    #conn = mysql.connector.connect(user = 'root', password = 'FhVj9ot4', host = '104.154.59.36', port = '3306', database = "amped")
-    conn = mysql.connector.connect(user = 'root', password = 'UPEL@usu670', host = 'localhost', database = 'can_data') 
+    conn = mysql.connector.connect(user = 'root', password = 'FhVj9ot4', host = '104.154.59.36', port = '3306', database = "amped")
+    #conn = mysql.connector.connect(user = 'root', password = 'UPEL@usu670', host = 'localhost', database = 'can_data') 
     curs = conn.cursor()
     
     for root, dirs, files in os.walk('C:\\Users\\Chris\\Dropbox\\Projects\\AMPED\\AMPED_Data\\CAN_Sniffer_Data',topdown = False):
         for zipFileName in files:
+            starttime = datetime.now()
             if re.search(r'\.zip',zipFileName):
                 print os.path.join(root,zipFileName)
                 m = re.match(r'.*\\(\d{4})\\(\d+)\\(\d+)\\(\d{2})-(\d{2})-(\d{2})(\(\d*\))?\.zip',os.path.join(root,zipFileName))
@@ -550,12 +550,15 @@ if __name__ == '__main__':
                     with zipfile.ZipFile(os.path.join(root,zipFileName),'r') as zipin:
                         with zipin.open(zipin.namelist()[0]) as fin:
                             [parse_data(line) for line in fin]
+            conn.commit()
+            endtime = datetime.now()
+            print endtime-starttime
 
  
     conn.commit()
     curs.close()
     conn.close()
 
-    endtime = datetime.now()
-    print endtime-starttime
+    #endtime = datetime.now()
+    #print endtime-starttime
     

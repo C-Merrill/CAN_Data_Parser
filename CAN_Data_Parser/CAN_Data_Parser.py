@@ -537,7 +537,7 @@ if __name__ == '__main__':
     #conn = mysql.connector.connect(user = 'root', password = 'UPEL@usu670', host = 'localhost', database = 'can_data') 
     curs = conn.cursor()
     
-    for root, dirs, files in os.walk('C:\\Users\\Chris\\Dropbox\\Projects\\AMPED\\AMPED_Data\\CAN_Sniffer_Data',topdown = False):
+    for root, dirs, files in os.walk('C:\\Users\\A01488892\\Dropbox\\Projects\\AMPED\\AMPED_Data\\CAN_Sniffer_Data',topdown = False):
         for zipFileName in files:
             starttime = datetime.now()
             if re.search(r'\.zip',zipFileName):
